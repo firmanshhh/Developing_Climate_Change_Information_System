@@ -1,0 +1,2 @@
+BLOCKED_PATHS = [
+    "/admin/",]

@@ -11,6 +11,7 @@ import zipfile
 from config import BLOCKED_PATHS
 import pandas as pd
 import json
+from app.config import BLOCKED_PATHS
 
 # ========================
 # 🔧 KONFIGURASI APLIKASI
