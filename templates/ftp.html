@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>FTP BAPI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icons/bmkg.svg') }}">
+</head>
+<body>
+  {% include 'header.html' %}
+  <main class="main-content">
+    <h2>FTP PERUBAHAN IKLIM</h2>
+    <!-- <div class="path-bar">
+      {% if current_path %}
+        <span>📁 /files/{{ current_path }}/</span>
+      {% else %}
+        <span>📁 /files/</span>
+      {% endif %}
+    </div> -->
+
+    {% if error %}
+      <p class="error"><strong>{{ error }}</strong></p>
+    {% else %}
+      <div class="controls">
+        <!-- Upload hanya untuk admin -->
+        {% if is_admin %}
+          <input type="file" id="file-input" name="files" multiple style="display:none" />
+          <button type="button" onclick="document.getElementById('file-input').click()">📤 Upload</button>
+          
+          <button id="create-folder-btn">📁 Buat Folder</button>
+          <button id="delete-selected" disabled>🗑️ Hapus Terpilih</button>
+        {% endif %}
+
+        <input type="text" id="search-input" placeholder="🔍 Cari file/folder..." />
+        <select id="sort-select" onchange="sortItems(this.value)">
+          <option value="">Urutkan</option>
+          <option value="name-asc">🔤 A → Z</option>
+          <option value="name-desc">🔤 Z → A</option>
+        </select>
+
+        {% if items %}
+          <button id="download-selected" disabled>⬇️ Download Terpilih</button>
+        {% endif %}
+      </div>
+
+      {% if not items %}
+        <p class="empty">📂 Folder kosong.</p>
+      {% else %}
+        <ul id="file-list">
+          {% if current_path %}
+            <li class="back-link-item">
+              <label>
+                <input type="checkbox" disabled style="display:none">
+                <a href="{{ url_for('browse', filepath=parent_path) if parent_path else url_for('browse') }}" class="back-link">
+                  🔙 Kembali
+                </a>
+              </label>
+            </li>
+          {% endif %}
+
+          {% for item in items %}
+            <li class="{{ 'folder' if item.is_dir else 'file' }}">
+              <label>
+                <input type="checkbox" name="selected" value="{{ item.name }}" {{ 'disabled' if item.is_dir else '' }}>
+                <a href="/files/{{ (current_path + '/' if current_path else '') + item.name + ('/' if item.is_dir else '') }}"
+                   target="{{ '_blank' if not item.is_dir else '_self' }}" class="item-link">
+                  <img
+                    src="{{ url_for('static', filename='icons/' + icon_map[item.name] + '.svg') }}"
+                    alt="{{ icon_map[item.name] }}"
+                    class="icon"
+                    onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xNCAySDZhMiAyIDAgMDAtMiAydjE2YTIgMiAwIDAwMiAyaDEyYTIgMiAwIDAwMi0yVjh6Ij48L3BhdGg+PHBvbHlsaW5lIHBvaW50cz0iMTQgMiAxNCA4IDIwIDgiPjwvcG9seWxpbmU+PC9zdmc+'; this.onerror=null;"
+                  >
+                  {{ item.name }}
+                  {% if not item.is_dir and item.size %}
+                    <span class="size">({{ '%.1f' % (item.size / 1024 / 1024) }} MB)</span>
+                  {% endif %}
+                </a>
+              </label>
+            </li>
+          {% endfor %}
+        </ul>
+
+        {% if current_path %}
+          <div class="actions">
+            <a href="/files/{{ current_path }}/download-zip" class="btn zip-btn">📦 Download Folder sebagai ZIP</a>
+          </div>
+        {% endif %}
+      {% endif %}
+    {% endif %}
+  </main>
+
+  {% include 'footer.html' %}
+
+  <script>
+    const CURRENT_PATH = {{ current_path | tojson }};
+  </script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

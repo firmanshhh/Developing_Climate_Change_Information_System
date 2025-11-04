@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Hasil Indeks Ekstrem</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 bg-dark text-white vh-100 p-3">
+                <h5 class="mb-4">ClimPACT</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('home') }}">🏠 Home</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('climpact') }}">📊 Proses Stasiun</a></li>
+                </ul>
+            </div>
+
+            <div class="col-md-10 p-4">
+                <h2>✅ Hasil Perhitungan Indeks Ekstrem</h2>
+                <ul class="nav nav-tabs mb-4">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('climpact') }}">1. Upload</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">2. Validasi</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="#">3. Hitung</a></li>
+                </ul>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">Hasil Indeks Ekstrem</div>
+                            <div class="card-body">
+                                <p><strong>Stasiun:</strong> {{ metadata.station_name }}</p>
+                                <p><strong>Latitude:</strong> {{ metadata.latitude }}, <strong>Longitude:</strong> {{ metadata.longitude }}</p>
+                                <p><strong>Periode Digunakan:</strong> {{ metadata.base_period_start }} – {{ metadata.base_period_end }}</p>
+                                <p><strong>Jumlah Tahun:</strong> {{ metadata.total_years }}</p>
+
+                                <div class="table-responsive mt-4">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>YEAR</th>
+                                                {% for col in result_df.columns %}
+                                                <th>{{ col }}</th>
+                                                {% endfor %}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for year, row in result_df.iterrows() %}
+                                            <tr>
+                                                <td>{{ year }}</td>
+                                                {% for col in result_df.columns %}
+                                                <td>{{ "%.2f"|format(row[col]) if row[col] is not none and row[col] != 'nan' else '-' }}</td>
+                                                {% endfor %}
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="mt-4">
+                                    <a href="{{ url_for('download_climpact_result', filename=result_filename) }}" class="btn btn-success">
+                                        💾 Unduh Hasil (CSV)
+                                    </a>
+                                    <a href="{{ url_for('climpact') }}" class="btn btn-secondary ms-2">🔄 Proses Lagi</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

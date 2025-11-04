@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Preview Data - ClimPACT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 bg-dark text-white vh-100 p-3">
+                <h5 class="mb-4">ClimPACT</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('home') }}">🏠 Home</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('climpact') }}">📊 Proses Stasiun</a></li>
+                </ul>
+            </div>
+
+            <div class="col-md-10 p-4">
+                <h2>🔍 Preview Data: {{ station_name }}</h2>
+                <ul class="nav nav-tabs mb-4">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('climpact') }}">1. Upload</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="#">2. Validasi</a></li>
+                    <li class="nav-item"><a class="nav-link disabled" href="#">3. Hitung</a></li>
+                </ul>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">Grafik Time Series</div>
+                            <div class="card-body">
+                                {% if has_temp %}
+                                <h4>🌡️ Suhu Harian</h4>
+                                <div id="temp-plot" style="width:100%; height:300px;"></div>
+                                {% endif %}
+
+                                {% if has_rain %}
+                                <h4>🌧️ Curah Hujan Harian</h4>
+                                <div id="rain-plot" style="width:100%; height:300px;"></div>
+                                {% endif %}
+
+                                <div class="mt-4">
+                                    <form method="POST" action="{{ url_for('climpact_process') }}">
+                                        <input type="hidden" name="temp_file" value="{{ temp_file }}">
+                                        <input type="hidden" name="station_name" value="{{ station_name }}">
+                                        <input type="hidden" name="latitude" value="{{ latitude }}">
+                                        <input type="hidden" name="longitude" value="{{ longitude }}">
+                                        <input type="hidden" name="start_year" value="{{ start_year or '' }}">
+                                        <input type="hidden" name="end_year" value="{{ end_year or '' }}">
+
+                                        <button type="submit" class="btn btn-success">✅ Hitung Indeks Ekstrem</button>
+                                        <a href="{{ url_for('climpact') }}" class="btn btn-secondary ms-2">❮ Kembali</a>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">Metadata</div>
+                            <div class="card-body">
+                                <p><strong>Stasiun:</strong> {{ station_name }}</p>
+                                <p><strong>Latitude:</strong> {{ latitude }}, <strong>Longitude:</strong> {{ longitude }}</p>
+                                <p><strong>Periode Data:</strong> {{ year_range }}</p>
+                                <p><strong>Periode Digunakan:</strong> {{ start_year or data_start_year }} – {{ end_year or data_end_year }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dates = {{ dates_json|safe }};
+        {% if has_temp %}
+        const tmax = {{ tmax_json|safe }};
+        const tmin = {{ tmin_json|safe }};
+        Plotly.newPlot('temp-plot', [
+            {x: dates, y: tmax, type: 'scatter', mode: 'lines', name: 'Tmax (°C)', line: {color: 'red'}},
+            {x: dates, y: tmin, type: 'scatter', mode: 'lines', name: 'Tmin (°C)', line: {color: 'blue'}}
+        ], {
+            title: 'Time Series Suhu Harian',
+            xaxis: {title: 'Tanggal'},
+            yaxis: {title: 'Suhu (°C)'},
+            hovermode: 'x unified'
+        });
+        {% endif %}
+
+        {% if has_rain %}
+        const pr = {{ pr_json|safe }};
+        Plotly.newPlot('rain-plot', [
+            {x: dates, y: pr, type: 'bar', name: 'Curah Hujan (mm)', marker: {color: 'dodgerblue'}}
+        ], {
+            title: 'Time Series Curah Hujan Harian',
+            xaxis: {title: 'Tanggal'},
+            yaxis: {title: 'Curah Hujan (mm)'},
+            hovermode: 'x unified'
+        });
+        {% endif %}
+    </script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>ClimPACT - Proses Stasiun</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Sidebar -->
+        <div class="row">
+            <div class="col-md-2 bg-dark text-white vh-100 p-3">
+                <h5 class="mb-4">ClimPACT</h5>
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('home') }}">🏠 Home</a></li>
+                    <li class="nav-item"><a class="nav-link text-white active" href="{{ url_for('climpact') }}">📊 Proses Stasiun</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="#">📁 Batch Process</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="#">📚 Dokumentasi</a></li>
+                </ul>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10 p-4">
+                <h2>Proses Data Stasiun Tunggal</h2>
+                <ul class="nav nav-tabs mb-4">
+                    <li class="nav-item"><a class="nav-link active" href="#">Upload</a></li>
+                    <li class="nav-item"><a class="nav-link disabled" href="#">Preview</a></li>
+                    <li class="nav-item"><a class="nav-link disabled" href="#">Hitung</a></li>
+                </ul>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">Upload File Data Stasiun</div>
+                            <div class="card-body">
+                                <form id="climpactForm" method="POST" enctype="multipart/form-data">
+                                    <div class="mb-3">
+                                        <label>File Data Stasiun (CSV/TXT):</label>
+                                        <input type="file" id="stationFile" name="station_file" class="form-control" required accept=".csv,.txt">
+                                        <small class="text-muted">
+                                            Format: delimiter <code>;</code>, kolom wajib: <code>DATA_TIMESTAMP, NAME, CURRENT_LATITUDE, CURRENT_LONGITUDE, tmin, tmax, ch, YEAR</code>
+                                        </small>
+                                    </div>
+
+                                    <!-- Preview metadata dari file (auto-filled) -->
+                                    <div class="mb-3">
+                                        <label>Preview Metadata (dari baris pertama file):</label>
+                                        <input type="text" id="stationName" name="station_name" class="form-control" placeholder="Nama stasiun akan terisi otomatis" readonly>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label>Latitude:</label>
+                                            <input type="number" id="latitude" name="latitude" class="form-control" step="0.0001" placeholder="0.0000" readonly>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label>Longitude:</label>
+                                            <input type="number" id="longitude" name="longitude" class="form-control" step="0.0001" placeholder="0.0000" readonly>
+                                        </div>
+                                    </div>
+
+                                    <!-- Opsional: periode kustom -->
+                                    <div class="row mt-3">
+                                        <div class="col-md-6">
+                                            <label>Start Year (opsional):</label>
+                                            <input type="number" id="startYear" name="start_year" class="form-control" placeholder="Contoh: 1991">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label>End Year (opsional):</label>
+                                            <input type="number" id="endYear" name="end_year" class="form-control" placeholder="Contoh: 2020">
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4">
+                                        <a href="{{ url_for('generate_template') }}" class="btn btn-outline-secondary">
+                                            📄 Generate Template
+                                        </a>
+                                        <button type="submit" class="btn btn-primary ms-2">🔍 Preview Data</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">Petunjuk</div>
+                            <div class="card-body">
+                                <h6>Format File</h6>
+                                <p>File harus berisi kolom berikut:</p>
+                                <ul>
+                                    <li><code>DATA_TIMESTAMP</code> (DD/MM/YYYY)</li>
+                                    <li><code>NAME</code> (nama stasiun)</li>
+                                    <li><code>CURRENT_LATITUDE</code>, <code>CURRENT_LONGITUDE</code></li>
+                                    <li><code>tave</code>, <code>tmin</code>, <code>tmax</code> (°C)</li>
+                                    <li><code>ch</code> (curah hujan, mm)</li>
+                                    <li><code>YEAR</code>, <code>MONTH</code>, <code>DAY</code></li>
+                                </ul>
+                                <p>Contoh baris:
+                                    <code>01/01/1981;96001;Stasiun Maimun Saleh;5.87655;95.33785;23;28.3;0;1981;1;1</code>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Kirim CURRENT_PATH ke JS (jika diperlukan)
+        window.CURRENT_PATH = '';
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

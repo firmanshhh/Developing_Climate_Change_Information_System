@@ -1,0 +1,72 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.ipynb_checkpoints
+
+# =========================
+# Virtual Environment
+# =========================
+.venv/
+venv/
+env/
+ENV/
+
+# =========================
+# Environment & Secrets
+# =========================
+.env
+.env.local
+.env.*.local
+
+# =========================
+# Logs & Runtime Files
+# =========================
+*.log
+logs/
+*.pid
+
+# =========================
+# Uploads & User-Generated Data
+# =========================
+uploads/
+files/                  # Hapus baris ini jika 'files/' berisi data statis yang HARUS di-versioning
+
+# =========================
+# Large Data & Model Files (JANGAN masuk repo)
+# =========================
+*.csv
+*.xlsx
+*.xls
+*.nc
+*.h5
+*.hdf5
+*.mat
+*.pkl
+*.joblib
+*.pt
+*.pth
+*.onnx
+*.so
+*.dll
+*.dylib
+data/
+raw/
+processed/
+models/
+results/
+output/
+
+# =========================
+# System & Editor
+# =========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo

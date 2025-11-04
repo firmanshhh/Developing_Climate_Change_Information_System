@@ -1,0 +1,27 @@
+<header class="web-header">
+    <a href="{{ url_for('home') }}" class="logo-container">
+        <img src="{{ url_for('static', filename='icons/bmkg.svg') }}" alt="BMKG Logo" class="bmkg-logo">
+        <div class="logo-text">
+            <strong>CLIMATE CHANGE INFORMATION SYSTEM</strong><br>
+            <small>Badan Meteorologi Klimatologi dan Geofisika</small>
+        </div>
+    </a>
+
+    <nav class="home-navigasi">
+        <ul>
+            <li><a href="{{ url_for('climpact') }}">Climpact</a></li>
+            {% if session.logged_in %}
+                <li><span style="color:#0056b3;">Halo, {{ session.username }}</span></li>
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% else %}
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+            {% endif %}
+            
+            <li>
+                <button id="theme-toggle" class="theme-toggle-btn">
+                    🌙 Mode Malam
+                </button>
+            </li>
+        </ul>
+    </nav>
+</header>

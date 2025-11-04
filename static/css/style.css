@@ -1,0 +1,453 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #ffffff;
+  color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ============== Header BMKG ============== */
+.web-header {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  background: rgb(255, 255, 255);
+  border-bottom: 1px solid #dee2e6;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo-container img {
+  height: 60px;
+  width: auto;
+}
+
+.logo-text {
+  text-align: left;
+}
+
+.logo-text strong {
+  font-size: 16px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.logo-text small {
+  font-size: 12px;
+  color: #7f8c8d;
+}
+
+.home-navigasi ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 20px;
+}
+
+.home-navigasi a {
+  text-decoration: none;
+  color: #495057;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.home-navigasi a:hover {
+  background: #e9ecef;
+  color: #2c3e50;
+}
+
+/* ============== Konten Utama File Manager ============== */
+.main-content {
+  max-width: 1200px;
+  margin: 30px auto;
+  background: none;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+.path-bar {
+  padding: 10px 0;
+  font-size: 0.95em;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+/* Kontrol: Upload, Buat Folder, Hapus, Cari, Urut */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.controls button {
+  padding: 8px 16px;
+  background: #0056b3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.controls button:hover {
+  background: #004080;
+  transform: translateY(-1px);
+}
+
+.controls button:disabled {
+  background: #adb5bd;
+  cursor: not-allowed;
+  transform: none;
+}
+
+#search-input {
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  flex: 1;
+  min-width: 200px;
+}
+
+#sort-select {
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+}
+
+/* Daftar File & Folder */
+#file-list {
+  list-style: none;
+  width: 100%;
+}
+
+#file-list li {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+#file-list li label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  cursor: pointer;
+}
+
+#file-list li input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.item-link,
+.back-link {
+  text-decoration: none;
+  color: #0056b3;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.item-link:hover,
+.back-link:hover {
+  color: #004080;
+  text-decoration: underline;
+}
+
+.size {
+  font-size: 0.85em;
+  color: #6c757d;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.empty, .error {
+  text-align: center;
+  padding: 30px 0;
+  color: #e74c3c;
+  font-size: 16px;
+}
+
+/* Tombol Aksi Tambahan */
+.actions {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.zip-btn {
+  display: inline-block;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.zip-btn:hover {
+  background: linear-gradient(135deg, #219653, #27ae60);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2);
+}
+
+/* ============== Footer BMKG ============== */
+.footer {
+  background: #343a40;
+  color: #ffffff;
+  padding: 40px 20px 20px;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-top: auto;
+}
+
+.footer-top {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #495057;
+}
+
+.footer-logos img {
+  height: 50px;
+  width: auto;
+  filter: brightness(0) invert(1);
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 20px;
+  border-top: 1px solid #495057;
+}
+
+.footer-info {
+  display: flex;
+  gap: 20px;
+}
+
+.footer-info a {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.footer-info a:hover {
+  color: #adb5bd;
+}
+
+/* ============== Responsif ============== */
+@media (max-width: 768px) {
+  .web-header {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .home-navigasi ul {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #search-input,
+  #sort-select {
+    width: 100%;
+  }
+}
+
+/* ============== Dark Mode ============== */
+body.dark-mode {
+  background: #121212;
+  color: #e0e0e0;
+}
+
+/* Header Dark */
+body.dark-mode .web-header {
+  background: #1e1e1e;
+  border-bottom-color: #333;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .logo-text strong {
+  color: #e0e0e0;
+}
+
+body.dark-mode .logo-text small {
+  color: #aaa;
+}
+
+body.dark-mode .home-navigasi a {
+  color: #ccc;
+}
+
+body.dark-mode .home-navigasi a:hover {
+  background: #2a2a2a;
+  color: #e0e0e0;
+}
+
+/* Konten Dark */
+body.dark-mode .main-content {
+  background: #1e1e1e;
+  color: #e0e0e0;
+}
+
+body.dark-mode .path-bar {
+  color: #bbb;
+}
+
+body.dark-mode .controls {
+  border-bottom-color: #333;
+}
+
+body.dark-mode #search-input,
+body.dark-mode #sort-select {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+/* Daftar File Dark */
+body.dark-mode #file-list li {
+  border-bottom-color: #333;
+}
+
+body.dark-mode .item-link,
+body.dark-mode .back-link {
+  color: #64b5f6;
+}
+
+body.dark-mode .item-link:hover,
+body.dark-mode .back-link:hover {
+  color: #90caf9;
+}
+
+body.dark-mode .size {
+  color: #999;
+}
+
+body.dark-mode .empty,
+body.dark-mode .error {
+  color: #ff6b6b;
+}
+
+/* Tombol Dark */
+body.dark-mode .controls button {
+  background: #1976d2;
+  color: white;
+}
+
+body.dark-mode .controls button:hover {
+  background: #1565c0;
+}
+
+body.dark-mode .controls button:disabled {
+  background: #555;
+  color: #999;
+}
+
+body.dark-mode .zip-btn {
+  background: linear-gradient(135deg, #2e7d32, #388e3c);
+}
+
+body.dark-mode .zip-btn:hover {
+  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+  box-shadow: 0 4px 12px rgba(46, 204, 113, 0.1);
+}
+
+/* Footer Dark (sudah gelap, jadi cukup sedikit penyesuaian) */
+body.dark-mode .footer {
+  background: #0d0d0d;
+  border-top-color: #333;
+}
+
+body.dark-mode .footer-info a {
+  color: #90caf9;
+}
+
+body.dark-mode .footer-info a:hover {
+  color: #bbdefb;
+}
+
+/* Tombol Toggle */
+.theme-toggle-btn {
+  background: none;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 14px;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+body.dark-mode .theme-toggle-btn {
+  border-color: #444;
+  color: #e0e0e0;
+  background: #2a2a2a;
+}
+
+.theme-toggle-btn:hover {
+  background: #e9ecef;
+}
+
+body.dark-mode .theme-toggle-btn:hover {
+  background: #333;
+}
+
+/* Transisi Halus */
+.web-header,
+.main-content,
+.footer,
+.theme-toggle-btn {
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+/***************************************
+ * End of CSS File
+ ****************************************
