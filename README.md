@@ -20,21 +20,14 @@ Aplikasi web berbasis **Flask** untuk mengelola, menampilkan, dan menganalisis d
    cd Developing_Climate_Change_Information_System
 
 2. **Buat dan aktifkan virtual environment**
-```bash
-#Linux (Terminal):
-python3 -m venv .venv
-source .venv/bin/activate
-
-```bash
-#Windows (CMD):
-python -m venv .venv
-.venv\Scripts\activate
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
 
 3. **Instal dependensi**
-```bash
-pip install -r requirements.txt:
-
+   ```bash
+   pip install -r requirements.txt:
 
 4. **Jalankan Applikasi**
-```bash
-python app.py:
+   ```bash
+   python app.py:
