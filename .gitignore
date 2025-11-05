@@ -35,6 +35,7 @@ logs/
 # =========================
 uploads/
 files/                  # Hapus baris ini jika 'files/' berisi data statis yang HARUS di-versioning
+data/
 
 # =========================
 # Large Data & Model Files (JANGAN masuk repo)
