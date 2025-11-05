@@ -29,8 +29,8 @@ python -m venv .venv
 .venv\Scripts\activate
 
 3. **Instal dependensi**
--pip install -r requirements.txt:
+- pip install -r requirements.txt:
 
 
 4. **Jalankan Applikasi**
--python app.py:
+- python app.py:
