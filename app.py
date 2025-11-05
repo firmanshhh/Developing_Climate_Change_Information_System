@@ -1,6 +1,6 @@
 from flask import (
     Flask, render_template, send_from_directory, send_file,
-    request, redirect, url_for, session, flash
+    request, redirect, url_for, session, flash, jsonify
 )
 from werkzeug.utils import secure_filename
 import os
@@ -11,7 +11,6 @@ import zipfile
 from config import BLOCKED_PATHS
 import pandas as pd
 import json
-from config import BLOCKED_PATHS
 
 # ========================
 # 🔧 KONFIGURASI APLIKASI
@@ -24,8 +23,15 @@ ADMIN_USERS = {
     'bmkg': 'climate2025'
 }
 
+# Folder utama
 ROOT_FOLDER = os.path.abspath('./files')
+ROOT_UPLOADS = os.path.abspath('./data/uploads')
+ROOT_RESULT = os.path.abspath('./data/results')
+
+# Pastikan folder ada
 os.makedirs(ROOT_FOLDER, exist_ok=True)
+os.makedirs(ROOT_UPLOADS, exist_ok=True)
+os.makedirs(ROOT_RESULT, exist_ok=True)
 
 
 # ========================
@@ -143,9 +149,11 @@ def logout():
 def home():
     return redirect(url_for('browse'))
 
+
 # ========================
 # 🌦️ CLIMPACT ROUTES
 # ========================
+
 @app.route('/climpact')
 def climpact():
     return render_template('climpact.html')
@@ -161,9 +169,8 @@ def climpact_preview():
         flash('File tidak dipilih.', 'error')
         return redirect(url_for('climpact'))
 
-    # Simpan sementara
     filename = secure_filename(file.filename)
-    filepath = os.path.join('uploads', filename)
+    filepath = os.path.join(ROOT_UPLOADS, filename)
     file.save(filepath)
 
     try:
@@ -173,12 +180,10 @@ def climpact_preview():
             if col not in df.columns:
                 raise ValueError(f"Kolom '{col}' tidak ditemukan dalam file.")
 
-        # Konversi tanggal
         df['date'] = pd.to_datetime(df['DATA_TIMESTAMP'], format='%d/%m/%Y', errors='coerce')
         if df['date'].isnull().any():
             raise ValueError("Format tanggal DATA_TIMESTAMP tidak valid. Harus DD/MM/YYYY.")
 
-        # Ambil metadata
         first_row = df.iloc[0]
         station_name = str(first_row['NAME']).strip()
         lat = float(first_row['CURRENT_LATITUDE'])
@@ -189,15 +194,12 @@ def climpact_preview():
         if not (-180 <= lon <= 180):
             raise ValueError("Longitude harus antara -180 dan 180.")
 
-        # Tentukan rentang tahun
         data_min_year = int(df['YEAR'].min())
         data_max_year = int(df['YEAR'].max())
 
-        # Ambil input manual (boleh kosong)
         start_year = request.form.get('start_year', '').strip() or None
         end_year = request.form.get('end_year', '').strip() or None
 
-        # Validasi manual input
         use_start = int(start_year) if start_year is not None else None
         use_end = int(end_year) if end_year is not None else None
 
@@ -214,20 +216,17 @@ def climpact_preview():
             final_start = data_min_year
             final_end = data_max_year
 
-        # Filter data
         df = df[(df['YEAR'] >= final_start) & (df['YEAR'] <= final_end)]
         if df.empty:
             raise ValueError("Tidak ada data dalam periode yang ditentukan.")
 
-        # Siapkan data untuk plot
         dates = df['date'].dt.strftime('%Y-%m-%d').tolist()
         tmax = df['tmax'].where(pd.notnull(df['tmax']), None).tolist()
         tmin = df['tmin'].where(pd.notnull(df['tmin']), None).tolist()
         pr = df['ch'].where(pd.notnull(df['ch']), None).tolist()
 
-        # Simpan file sementara dengan ID unik
         temp_id = f"{os.path.splitext(filename)[0]}_{int(pd.Timestamp.now().timestamp())}"
-        temp_path = os.path.join('uploads', temp_id + '.csv')
+        temp_path = os.path.join(ROOT_UPLOADS, temp_id + '.csv')
         os.rename(filepath, temp_path)
 
         return render_template(
@@ -262,7 +261,7 @@ def climpact_process():
         flash('File sementara tidak ditemukan.', 'error')
         return redirect(url_for('climpact'))
 
-    filepath = os.path.join('uploads', temp_file)
+    filepath = os.path.join(ROOT_UPLOADS, temp_file)
     if not os.path.exists(filepath):
         flash('File sementara telah kadaluarsa.', 'error')
         return redirect(url_for('climpact'))
@@ -275,10 +274,9 @@ def climpact_process():
         result_df, metadata = process_climpact_data(filepath, start_year, end_year)
 
         result_filename = f"{metadata['station_name'].replace(' ', '_')}_indices.csv"
-        result_path = os.path.join('uploads', result_filename)
+        result_path = os.path.join(ROOT_RESULT, result_filename)
         result_df.to_csv(result_path)
 
-        # Hapus file sementara
         os.remove(filepath)
 
         return render_template(
@@ -318,7 +316,45 @@ def generate_template():
 
 @app.route('/climpact/download/<filename>')
 def download_climpact_result(filename):
-    return send_from_directory('uploads', filename, as_attachment=True)
+    return send_from_directory(ROOT_RESULT, filename, as_attachment=True)
+
+@app.route('/climpact/batch')
+def climpact_batch():
+    return render_template('climpact_batch.html')
+
+@app.route('/climpact/batch/process', methods=['POST'])
+def climpact_batch_process():
+    if 'station_files' not in request.files:
+        flash('Tidak ada file yang dipilih.', 'error')
+        return redirect(url_for('climpact_batch'))
+
+    files = request.files.getlist('station_files')
+    if not files or all(f.filename == '' for f in files):
+        flash('File tidak valid.', 'error')
+        return redirect(url_for('climpact_batch'))
+
+    start_year = request.form.get('start_year', '').strip() or None
+    end_year = request.form.get('end_year', '').strip() or None
+
+    try:
+        from utils.batch_processor import process_batch
+        zip_path, summary_path = process_batch(
+            files,
+            start_year=start_year,
+            end_year=end_year,
+            output_dir=ROOT_RESULT
+        )
+
+        final_zip = os.path.join(ROOT_RESULT, f"batch_{int(pd.Timestamp.now().timestamp())}_results.zip")
+        with zipfile.ZipFile(final_zip, 'w') as zf:
+            zf.write(zip_path, arcname="hasil_per_stasiun.zip")
+            zf.write(summary_path, arcname="summary_all_stations.csv")
+
+        return send_file(final_zip, as_attachment=True, download_name="batch_climpact_results.zip")
+
+    except Exception as e:
+        flash(f"Error saat memproses batch: {str(e)}", 'error')
+        return redirect(url_for('climpact_batch'))
 
 
 # ========================
