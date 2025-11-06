@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Inisialisasi fitur Climpact jika ada
+  // Inisialisasi semua fitur
   initClimpactAutoFill();
   initClimpactFormHandler();
   initFileManager();
@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ==================================
 // 📤 Auto-Fill Metadata dari File Upload (ClimPACT)
-// Mendukung delimiter: ; (utama), tab, koma
 // ==================================
 function initClimpactAutoFill() {
   const fileInput = document.getElementById('stationFile');
@@ -57,7 +56,6 @@ function initClimpactAutoFill() {
           return;
         }
 
-        // Deteksi delimiter: utamakan ;, lalu \t, lalu ,
         let separator = ',';
         const firstLine = lines[0];
         if (firstLine.includes(';')) separator = ';';
@@ -66,7 +64,6 @@ function initClimpactAutoFill() {
         const headers = firstLine.split(separator).map(h => h.trim());
         const firstDataRow = lines[1].split(separator).map(v => v.trim());
 
-        // Validasi kolom wajib
         const required = ['NAME', 'CURRENT_LATITUDE', 'CURRENT_LONGITUDE'];
         const missing = required.filter(col => !headers.includes(col));
         if (missing.length > 0) {
@@ -101,7 +98,7 @@ function initClimpactAutoFill() {
 }
 
 // ==================================
-// 📤 Handler Form Climpact: Submit ke /climpact/preview
+// 📤 Handler Form Climpact
 // ==================================
 function initClimpactFormHandler() {
   const form = document.getElementById('climpactForm');
@@ -123,22 +120,17 @@ function initClimpactFormHandler() {
           alert('Error: ' + (data.error || 'Gagal memproses file.'));
           return;
         }
-        // Jika sukses dan kembali ke HTML, biarkan redirect alami
-        // Tapi ini tidak terjadi — preview mengembalikan HTML, bukan JSON
       }
 
-      // Jika respons HTML (template), biarkan browser handle
       if (res.ok) {
         const html = await res.text();
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
         if (doc.querySelector('title')?.textContent?.includes('Preview')) {
-          // Ganti seluruh halaman
           document.open();
           document.write(html);
           document.close();
         } else {
-          // Ada error di backend → tampilkan pesan
           const errorMsg = doc.querySelector('.alert')?.textContent || 'Terjadi kesalahan.';
           alert(errorMsg);
         }
@@ -154,6 +146,35 @@ function initClimpactFormHandler() {
 }
 
 // ==================================
+// 🔀 SORT ITEMS — GLOBAL FUNCTION (WAJIB DI LUAR initFileManager)
+// ==================================
+function sortItems(order) {
+  const list = document.getElementById('file-list');
+  if (!list) return;
+
+  const backLink = list.querySelector('.back-link-item');
+  const items = Array.from(list.querySelectorAll('li:not(.back-link-item)'));
+
+  items.sort((a, b) => {
+    const nameA = a.querySelector('.item-name')?.textContent.trim().toLowerCase() || '';
+    const nameB = b.querySelector('.item-name')?.textContent.trim().toLowerCase() || '';
+
+    if (order === 'name-asc') return nameA.localeCompare(nameB);
+    if (order === 'name-desc') return nameB.localeCompare(nameA);
+    return 0;
+  });
+
+  // Reset list
+  while (list.lastChild) list.removeChild(list.lastChild);
+  if (backLink) list.appendChild(backLink);
+  items.forEach(item => list.appendChild(item));
+
+  // Reset dropdown
+  const sortSelect = document.getElementById('sort-select');
+  if (sortSelect) sortSelect.value = '';
+}
+
+// ==================================
 // 📁 File Manager: Multi-select, Aksi, Folder, Sorting
 // ==================================
 function initFileManager() {
@@ -162,10 +183,14 @@ function initFileManager() {
   const deleteBtn = document.getElementById('delete-selected');
   const createBtn = document.getElementById('create-folder-btn');
   const searchInput = document.getElementById('search-input');
+  const fileInput = document.getElementById('file-input');
+  const uploadForm = document.getElementById('upload-form');
 
-  // Update button status
+  // Update status tombol berdasarkan checkbox yang terlihat
   function updateButtons() {
-    const checked = Array.from(checkboxes).some(cb => cb.checked);
+    const checked = Array.from(checkboxes).some(cb =>
+      cb.checked && cb.closest('li')?.style.display !== 'none'
+    );
     if (downloadBtn) downloadBtn.disabled = !checked;
     if (deleteBtn) deleteBtn.disabled = !checked;
   }
@@ -175,17 +200,43 @@ function initFileManager() {
     updateButtons();
   }
 
+  // Upload
+  if (uploadForm && fileInput) {
+    fileInput.addEventListener('change', async (e) => {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+
+      const fd = new FormData(uploadForm);
+      try {
+        const res = await fetch('/upload', {
+          method: 'POST',
+          body: fd
+        });
+
+        if (res.ok && (await res.text()) === 'OK') {
+          alert('✅ File berhasil diunggah!');
+          window.location.reload();
+        } else {
+          const errMsg = await res.text();
+          alert('❌ Gagal upload:\n' + errMsg);
+        }
+      } catch (err) {
+        alert('❌ Error jaringan: ' + err.message);
+      } finally {
+        fileInput.value = '';
+      }
+    });
+  }
+
   // Download selected
   if (downloadBtn) {
     downloadBtn.addEventListener('click', () => {
       const selected = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
       if (!selected.length) return;
-      const url = new URL(window.location);
-      url.pathname = '/download-selected';
       const p = new URLSearchParams();
       selected.forEach(f => p.append('files', f));
       p.set('path', window.CURRENT_PATH || '');
-      window.location.href = url;
+      window.location.href = `/download-selected?${p.toString()}`;
     });
   }
 
@@ -207,56 +258,93 @@ function initFileManager() {
     });
   }
 
-  // Create folder
-  if (createBtn) {
-    createBtn.addEventListener('click', async () => {
-      const name = prompt('Nama folder:');
-      if (!name?.trim()) return;
-      if (name.includes('/') || name.includes('\\') || name.includes('..')) {
-        alert('Nama tidak valid.');
-        return;
-      }
+  // Create folder modal
+  const modal = document.getElementById('mkdir-modal');
+  const form = document.getElementById('mkdir-form');
+
+  if (createBtn && modal && form) {
+    createBtn.addEventListener('click', () => {
+      document.getElementById('folder-name').value = '';
+      modal.style.display = 'block';
+    });
+
+    window.closeMkdirModal = () => {
+      modal.style.display = 'none';
+    };
+
+    window.addEventListener('click', (e) => {
+      if (e.target === modal) closeMkdirModal();
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('folder-name').value.trim();
+      const path = document.getElementById('mkdir-path')?.value || '';
+
+      if (!name) return;
+
       const fd = new FormData();
-      fd.append('path', window.CURRENT_PATH || '');
-      fd.append('name', name.trim());
+      fd.append('path', path);
+      fd.append('name', name);
+
       try {
         const res = await fetch('/mkdir', { method: 'POST', body: fd });
-        if (res.ok) location.reload();
-        else alert('Gagal: ' + (await res.text()));
+        const text = await res.text();
+
+        if (res.ok && text === 'OK') {
+          alert('✅ Folder berhasil dibuat!');
+          closeMkdirModal();
+          window.location.reload();
+        } else {
+          alert('❌ Gagal membuat folder:\n' + text);
+        }
       } catch (err) {
-        alert('Error: ' + err.message);
+        alert('❌ Error jaringan: ' + err.message);
       }
     });
   }
 
-  // Search & sort (jika ada)
+  // Search — ✅ DIPERBAIKI: gunakan .item-name
   if (searchInput) {
     searchInput.addEventListener('input', () => {
       const term = searchInput.value.toLowerCase();
       document.querySelectorAll('#file-list li:not(.back-link-item)').forEach(li => {
-        const name = li.querySelector('.item-link')?.textContent.toLowerCase() || '';
+        const name = li.querySelector('.item-name')?.textContent.toLowerCase() || '';
         li.style.display = name.includes(term) ? '' : 'none';
       });
+      updateButtons();
     });
   }
 }
 
-// Utility: Sorting (bisa dipanggil dari HTML onclick)
-window.sortItems = function(method) {
-  const list = document.getElementById('file-list');
-  if (!list) return;
-  const items = Array.from(list.children);
-  const staticStart = document.querySelector('.back-link-item') ? 1 : 0;
-  const static = items.slice(0, staticStart);
-  const sortable = items.slice(staticStart);
-  sortable.sort((a, b) => {
-    const aName = a.querySelector('.item-link')?.textContent.trim().split('(')[0].trim() || '';
-    const bName = b.querySelector('.item-link')?.textContent.trim().split('(')[0].trim() || '';
-    const aIsDir = a.classList.contains('folder');
-    const bIsDir = b.classList.contains('folder');
-    if (aIsDir !== bIsDir) return aIsDir ? -1 : 1;
-    return (method === 'name-desc' ? -1 : 1) * aName.localeCompare(bName, 'id');
-  });
-  list.innerHTML = '';
-  static.concat(sortable).forEach(item => list.appendChild(item));
-};
+// ==================================// ⏰ Tampilkan Tanggal dan Waktu Lokal serta UTC
+// ==================================
+
+  function updateDateTime() {
+    const now = new Date();
+    const local = new Intl.DateTimeFormat('id-ID', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: 'Asia/Jakarta'
+    }).format(now);
+    
+    const utc = new Intl.DateTimeFormat('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: 'UTC'
+    }).format(now);
+
+    document.getElementById('day-time').textContent = 
+      local.split('pukul ')[0];
+    let clean = utc.replace(/ PM$/, '');
+    document.getElementById('utc-time').textContent = "STANDAR WAKTU INDONESIA " +local.split('pukul ')[1] + "  /  " +  clean + '  UTC';
+  }
+
+  setInterval(updateDateTime, 1000);
+  updateDateTime();

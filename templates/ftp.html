@@ -5,19 +5,12 @@
   <title>FTP BAPI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icons/bmkg.svg') }}">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='icons/home/Logo_head.png') }}">
 </head>
 <body>
   {% include 'header.html' %}
   <main class="main-content">
     <h2>FTP PERUBAHAN IKLIM</h2>
-    <!-- <div class="path-bar">
-      {% if current_path %}
-        <span>📁 /files/{{ current_path }}/</span>
-      {% else %}
-        <span>📁 /files/</span>
-      {% endif %}
-    </div> -->
 
     {% if error %}
       <p class="error"><strong>{{ error }}</strong></p>
@@ -25,8 +18,12 @@
       <div class="controls">
         <!-- Upload hanya untuk admin -->
         {% if is_admin %}
-          <input type="file" id="file-input" name="files" multiple style="display:none" />
-          <button type="button" onclick="document.getElementById('file-input').click()">📤 Upload</button>
+          <!-- ✅ SATU-SATUNYA FORM UPLOAD -->
+          <form id="upload-form" style="display: inline-block;" enctype="multipart/form-data">
+            <input type="hidden" name="path" value="{{ current_path or '' }}">
+            <input type="file" id="file-input" name="files" multiple style="display:none" />
+            <button type="button" onclick="document.getElementById('file-input').click()">📤 Upload</button>
+          </form>
           
           <button id="create-folder-btn">📁 Buat Folder</button>
           <button id="delete-selected" disabled>🗑️ Hapus Terpilih</button>
@@ -62,16 +59,17 @@
           {% for item in items %}
             <li class="{{ 'folder' if item.is_dir else 'file' }}">
               <label>
-                <input type="checkbox" name="selected" value="{{ item.name }}" {{ 'disabled' if item.is_dir else '' }}>
+                <!-- <input type="checkbox" name="selected" value="{{ item.name }}" {{ 'disabled' if item.is_dir else '' }}> -->
+                <input type="checkbox" name="selected" value="{{ item.name }}">
                 <a href="/files/{{ (current_path + '/' if current_path else '') + item.name + ('/' if item.is_dir else '') }}"
-                   target="{{ '_blank' if not item.is_dir else '_self' }}" class="item-link">
+                  target="{{ '_blank' if not item.is_dir else '_self' }}" class="item-link">
                   <img
                     src="{{ url_for('static', filename='icons/' + icon_map[item.name] + '.svg') }}"
                     alt="{{ icon_map[item.name] }}"
                     class="icon"
                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0xNCAySDZhMiAyIDAgMDAtMiAydjE2YTIgMiAwIDAwMiAyaDEyYTIgMiAwIDAwMi0yVjh6Ij48L3BhdGg+PHBvbHlsaW5lIHBvaW50cz0iMTQgMiAxNCA4IDIwIDgiPjwvcG9seWxpbmU+PC9zdmc+'; this.onerror=null;"
                   >
-                  {{ item.name }}
+                  <span class="item-name">{{ item.name }}</span>  <!-- ✅ Tambahkan wrapper -->
                   {% if not item.is_dir and item.size %}
                     <span class="size">({{ '%.1f' % (item.size / 1024 / 1024) }} MB)</span>
                   {% endif %}
@@ -89,11 +87,38 @@
       {% endif %}
     {% endif %}
   </main>
+  
+  <!-- Modal: Buat Folder Baru (Hanya untuk Admin) -->
+  {% if is_admin %}
+  <div id="mkdir-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeMkdirModal()">&times;</span>
+      <h3>📁 Buat Folder Baru</h3>
+      <form id="mkdir-form">
+        <input type="hidden" id="mkdir-path" value="{{ current_path or '' }}">
+        <label for="folder-name">Nama Folder:</label>
+        <input type="text" 
+              id="folder-name" 
+              name="name" 
+              required 
+              placeholder="Contoh: stasiun_2025"
+              pattern="[a-zA-Z0-9_\-\.\(\) ]+"
+              title="Hanya huruf, angka, spasi, dan karakter: _ - . ( )">
+        <div class="modal-buttons">
+          <button type="submit">Buat Folder</button>
+          <button type="button" onclick="closeMkdirModal()">Batal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  {% endif %}
 
   {% include 'footer.html' %}
 
+  <!-- Script: Pastikan CURRENT_PATH aman -->
   <script>
-    const CURRENT_PATH = {{ current_path | tojson }};
+    window.CURRENT_PATH = {{ current_path | default('') | tojson }};
+    console.log("[DEBUG] CURRENT_PATH =", window.CURRENT_PATH);
   </script>
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>

@@ -24,9 +24,10 @@ ADMIN_USERS = {
 }
 
 # Folder utama
-ROOT_FOLDER = os.path.abspath('./files')
-ROOT_UPLOADS = os.path.abspath('./data/uploads')
-ROOT_RESULT = os.path.abspath('./data/results')
+BASE_DIR     = os.path.dirname(os.path.realpath(__file__))
+ROOT_FOLDER  = os.path.join(BASE_DIR, 'files')
+ROOT_UPLOADS = os.path.join(BASE_DIR, 'data', 'uploads')
+ROOT_RESULT  = os.path.join(BASE_DIR, 'data', 'results')
 
 # Pastikan folder ada
 os.makedirs(ROOT_FOLDER, exist_ok=True)
@@ -42,13 +43,12 @@ def is_admin():
     return session.get('user_role') == 'admin'
 
 def is_safe_path(base, path):
-    """Cegah path traversal"""
-    try:
-        base_real = os.path.realpath(base)
-        path_real = os.path.realpath(os.path.join(base, path))
-        return path_real.startswith(base_real + os.sep) or path_real == base_real
-    except Exception:
-        return False
+    """Cegah path traversal tanpa memecahkan symlink"""
+    if not path:
+        return True
+    base = os.path.abspath(base)
+    full_path = os.path.abspath(os.path.join(base, path))
+    return os.path.commonpath([base, full_path]) == base
 
 def contains_blocked_path(filepath):
     """Cek apakah path mengandung folder/file sensitif"""
@@ -87,6 +87,7 @@ def get_directory_contents(folder_path, show_blocked=False):
                     'name': name,
                     'is_file': False,
                     'is_dir': True,
+                    'is_dir': True,
                     'size': None,
                     'mtime': os.stat(item_path).st_mtime
                 })
@@ -109,11 +110,21 @@ def get_icon_class(filename):
         'ppt': 'ppt', 'pptx': 'ppt',
         'mp3': 'mp3', 'wav': 'mp3', 'ogg': 'mp3',
         'mp4': 'mp4', 'webm': 'mp4', 'avi': 'mp4', 'mkv': 'mp4',
-        'py': 'files', 'js': 'js', 'html': 'html', 'css': 'css', 'json': 'json', 'xml': 'xml',
+        'py': 'py','ipynb': 'py','nc': 'nc', 'js': 'js', 'html': 'html', 'css': 'css', 'json': 'json', 'xml': 'xml',
         'ai': 'files', 'psd': 'files'
     }
     return icons.get(ext, 'files')
 
+# Tambahkan di bagian atas helper functions (opsional tapi disarankan)
+def sanitize_path(path):
+    """Normalisasi path: hapus trailing/leading slash, ganti backslash, dan kolaps slash ganda."""
+    if not path:
+        return ''
+    # Ganti backslash (Windows) jadi slash
+    path = path.replace('\\', '/')
+    # Hapus slash berlebih
+    path = '/'.join(part for part in path.split('/') if part)
+    return path
 
 # ========================
 # 🔑 AUTHENTICATION ROUTES
@@ -148,7 +159,6 @@ def logout():
 @app.route('/')
 def home():
     return redirect(url_for('browse'))
-
 
 # ========================
 # 🌦️ CLIMPACT ROUTES
@@ -364,12 +374,20 @@ def climpact_batch_process():
 @app.route('/files/')
 @app.route('/files/<path:filepath>')
 def browse(filepath=""):
+    filepath = sanitize_path(filepath)
     if not is_safe_path(ROOT_FOLDER, filepath):
         return "🚫 Akses ditolak.", 403
     if contains_blocked_path(filepath) and not is_admin():
         return "🚫 Akses ditolak.", 403
 
     target_path = os.path.join(ROOT_FOLDER, filepath)
+    
+    # Tambahan: pastikan target symlink (jika ada) tetap aman
+    if os.path.islink(target_path):
+        link_target = os.readlink(target_path)
+        if not is_safe_path(ROOT_FOLDER, link_target) and not is_admin():
+            return "🚫 Symlink mengarah ke lokasi tidak aman.", 403
+        
     if os.path.isdir(target_path):
         items, error = get_directory_contents(target_path, show_blocked=is_admin())
         icon_map = {
@@ -439,32 +457,78 @@ def download_zip(filepath):
 def download_selected():
     files_param = request.args.getlist('files')
     if not files_param:
-        return "❌ Tidak ada file dipilih.", 400
+        return "❌ Tidak ada file/folder dipilih.", 400
 
-    current_path = request.args.get('path', '').strip('/')
+    raw_path = request.args.get('path', '')
+    current_path = sanitize_path(raw_path)  # ← gunakan helper Anda
     if not is_safe_path(ROOT_FOLDER, current_path) or (contains_blocked_path(current_path) and not is_admin()):
-        return "🚫 Akses ditolak.", 403
-    if not is_admin() and any(f in BLOCKED_PATHS for f in files_param):
         return "🚫 Akses ditolak.", 403
 
     target_dir = os.path.join(ROOT_FOLDER, current_path)
+    base_real = os.path.realpath(ROOT_FOLDER)
+
+    valid_items = []
+    for fname in files_param:
+        fname_clean = secure_filename(fname)
+        if not is_admin() and fname_clean in BLOCKED_PATHS:
+            continue
+
+        fpath = os.path.join(target_dir, fname_clean)
+        if not os.path.exists(fpath):
+            continue
+
+        # Dapatkan path absolut yang sudah resolve symlink
+        try:
+            real_path = os.path.realpath(fpath)
+        except OSError:
+            continue  # broken symlink
+
+        # Pastikan real_path di dalam ROOT_FOLDER
+        if not real_path.startswith(base_real + os.sep) and real_path != base_real:
+            continue
+
+        # Cek blocked path pada real_path relatif terhadap ROOT_FOLDER
+        rel_to_root = os.path.relpath(real_path, base_real)
+        if not is_admin():
+            rel_parts = rel_to_root.split(os.sep)
+            if any(part in BLOCKED_PATHS for part in rel_parts if part):
+                continue
+
+        is_dir = os.path.isdir(real_path)
+        valid_items.append((fname_clean, real_path, is_dir))
+
+    if not valid_items:
+        return "❌ Tidak ada file/folder valid untuk diunduh.", 400
+
+    # Jika hanya satu file → kirim langsung
+    if len(valid_items) == 1:
+        fname_clean, real_path, is_dir = valid_items[0]
+        if not is_dir:
+            return send_file(real_path, as_attachment=True, download_name=fname_clean)
+
+    # ZIP
     memory = BytesIO()
     with zipfile.ZipFile(memory, 'w', zipfile.ZIP_DEFLATED) as zf:
-        for fname in files_param:
-            fname_clean = secure_filename(fname)
-            if not is_admin() and fname_clean in BLOCKED_PATHS:
-                continue
-            fpath = os.path.join(target_dir, fname_clean)
-            if os.path.isfile(fpath):
-                zf.write(fpath, fname_clean)
+        for fname_clean, real_path, is_dir in valid_items:
+            if not is_dir:
+                zf.write(real_path, fname_clean)
+            else:
+                for root, dirs, files in os.walk(real_path):
+                    if not is_admin():
+                        dirs[:] = [d for d in dirs if d not in BLOCKED_PATHS]
+                        files = [f for f in files if f not in BLOCKED_PATHS]
+                    for f in files:
+                        full = os.path.join(root, f)
+                        arcname = os.path.relpath(full, base_real)
+                        zf.write(full, arcname)
+
     memory.seek(0)
     return send_file(
         memory,
         as_attachment=True,
-        download_name="selected_files.zip",
+        download_name="selected_items.zip",
         mimetype='application/zip'
     )
-
 
 # ========================
 # ⚙️ ADMIN-ONLY OPERATIONS
@@ -487,11 +551,25 @@ def upload_files():
         return "❌ Tidak ada file dipilih.", 400
 
     for file in files:
-        if file.filename:
-            filename = secure_filename(file.filename)
-            if filename in BLOCKED_PATHS:
-                continue
-            file.save(os.path.join(target_dir, filename))
+        if not file.filename:
+            continue
+        original_name = secure_filename(file.filename)
+        if original_name in BLOCKED_PATHS:
+            continue
+
+        # Pisahkan nama dasar dan ekstensi
+        name, ext = os.path.splitext(original_name)
+        candidate = original_name
+        counter = 1
+
+        # Cari nama yang belum ada
+        while os.path.exists(os.path.join(target_dir, candidate)):
+            candidate = f"{name}({counter}){ext}"
+            counter += 1
+
+        # Simpan dengan nama unik
+        file.save(os.path.join(target_dir, candidate))
+
     return "OK"
 
 
@@ -500,9 +578,11 @@ def make_directory():
     if not is_admin():
         return "🚫 Akses ditolak. Hanya admin.", 403
 
-    path = request.form.get('path', '').strip('/')
+    raw_path = request.form.get('path', '')
     folder_name = request.form.get('name', '').strip()
 
+    # Sanitasi path
+    path = sanitize_path(raw_path)
     if not folder_name:
         return "❌ Nama folder tidak boleh kosong.", 400
     if not re.match(r'^[a-zA-Z0-9_\-\.\(\) ]+$', folder_name):
@@ -511,9 +591,11 @@ def make_directory():
         return "❌ Nama folder tidak aman.", 400
     if folder_name in BLOCKED_PATHS:
         return "❌ Nama folder tidak diizinkan.", 400
-    if not is_safe_path(ROOT_FOLDER, path):
+    # Validasi path aman
+    if path and not is_safe_path(ROOT_FOLDER, path):
         return "🚫 Akses ditolak.", 403
 
+    # Bangun target path
     target_dir = os.path.join(ROOT_FOLDER, path, folder_name)
     if os.path.exists(target_dir):
         return f"❌ Folder '{folder_name}' sudah ada.", 400
@@ -522,8 +604,7 @@ def make_directory():
         os.makedirs(target_dir, exist_ok=False)
         return "OK"
     except Exception as e:
-        return f"❌ Gagal membuat folder: {str(e)}", 500
-
+        return f"❌ Gagal membuat folder: {str(e)}", 500    
 
 @app.route('/delete', methods=['POST'])
 def delete_items():
@@ -540,7 +621,8 @@ def delete_items():
     target_dir = os.path.join(ROOT_FOLDER, path)
     for name in items:
         name = secure_filename(name)
-        if name in BLOCKED_PATHS:
+        # ✅ Hanya skip jika BUKAN admin
+        if not is_admin() and name in BLOCKED_PATHS:
             continue
         item_path = os.path.join(target_dir, name)
         full_path = os.path.realpath(item_path)

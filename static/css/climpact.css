@@ -1,0 +1,467 @@
+/* ========================
+   ClimpACT Custom Styles
+   ======================== */
+
+/* Reset & Base */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  color: #333;
+  overflow-x: hidden;
+}
+
+/* Sidebar khusus ClimpACT */
+.climpact-sidebar {
+  background-color: #1e1e1e !important;
+  min-height: 100vh;
+  padding: 1.5rem 1rem;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.climpact-sidebar .logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.climpact-sidebar .logo-container img {
+  max-height: 70px;
+  width: auto;
+  object-fit: contain;
+}
+
+.climpact-sidebar .nav-link {
+  color: #e0e0e0 !important;
+  padding: 0.65rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 0.4rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.climpact-sidebar .nav-link:hover {
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+}
+
+.climpact-sidebar .nav-link.active {
+  background-color: #0d6efd !important;
+  color: #ffffff !important;
+}
+
+.climpact-sidebar .nav-link img {
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+}
+
+.climpact-sidebar .nav-link.active img {
+  filter: brightness(0) invert(1);
+  opacity: 1;
+}
+
+/* Main Content */
+.climpact-main {
+  background-color: #ffffff;
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+.climpact-main h2 {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+/* Tabs */
+.nav-tabs .nav-link {
+  font-weight: 500;
+  color: #495057;
+}
+
+.nav-tabs .nav-link.active {
+  color: #0d6efd;
+  border-bottom: 2px solid #0d6efd;
+}
+
+/* Cards */
+.card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+}
+
+.card-header {
+  background-color: #f1f3f5;
+  font-weight: 600;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Form styling */
+.form-control {
+  border: 1px solid #ced4da;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.95rem;
+}
+
+.form-control:focus {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+.form-control:read-only {
+  background-color: #f8f9fa;
+  opacity: 1;
+}
+
+.form-text, .text-muted {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+code {
+  background-color: #f1f3f5;
+  padding: 0.15em 0.3em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* Button styles */
+.btn-outline-secondary {
+  border-color: #adb5bd;
+  color: #495057;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .climpact-sidebar {
+    width: 100%;
+    height: auto;
+    min-height: auto;
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .climpact-main {
+    padding: 1rem;
+  }
+
+  .nav-tabs .nav-item {
+    flex: 1;
+    text-align: center;
+  }
+
+  .nav-tabs .nav-link {
+    border-radius: 6px 6px 0 0;
+    margin-right: 0 !important;
+  }
+
+  .card {
+    margin-bottom: 1rem;
+  }
+
+  .climpact-sidebar .nav-link {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .climpact-sidebar .nav-link img {
+    margin-right: 0 !important;
+    margin-bottom: 0.3rem;
+    display: block;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 576px) {/* ========================
+   ClimpACT Unified Styles
+   ======================== */
+
+/* Reset & Base */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  color: #333;
+  overflow-x: hidden;
+}
+
+/* Sidebar Styling */
+.climpact-sidebar {
+  background-color: #1e1e1e !important;
+  min-height: 100vh;
+  padding: 1.5rem 1rem;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.climpact-sidebar .logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.climpact-sidebar .logo-container img {
+  max-height: 70px;
+  width: auto;
+  object-fit: contain;
+}
+
+.climpact-sidebar h5 {
+  color: #ffffff;
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.climpact-sidebar .nav-link {
+  color: #e0e0e0 !important;
+  padding: 0.65rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 0.4rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.climpact-sidebar .nav-link:hover {
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+}
+
+.climpact-sidebar .nav-link.active {
+  background-color: #0d6efd !important;
+  color: #ffffff !important;
+}
+
+.climpact-sidebar .nav-link img {
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+  margin-right: 0.5rem;
+  width: 20px;
+  height: 20px;
+}
+
+.climpact-sidebar .nav-link.active img {
+  opacity: 1;
+}
+
+/* Main Content */
+.climpact-main {
+  background-color: #ffffff;
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+.climpact-main h2 {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+/* Tabs */
+.nav-tabs .nav-link {
+  font-weight: 500;
+  color: #495057;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.5rem 1rem;
+  margin-right: 0.5rem;
+}
+
+.nav-tabs .nav-link:hover {
+  color: #0d6efd;
+  border-bottom-color: #dee2e6;
+}
+
+.nav-tabs .nav-link.active {
+  color: #0d6efd;
+  border-bottom-color: #0d6efd;
+}
+
+/* Cards */
+.card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+}
+
+.card-header {
+  background-color: #f1f3f5;
+  font-weight: 600;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Form & Input */
+.form-control {
+  border: 1px solid #ced4da;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.95rem;
+}
+
+.form-control:focus {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+.form-control:read-only {
+  background-color: #f8f9fa;
+  opacity: 1;
+}
+
+.form-text, .text-muted {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+/* Code & Inline */
+code {
+  background-color: #f1f3f5;
+  padding: 0.15em 0.3em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: Consolas, Monaco, monospace;
+}
+
+/* Buttons */
+.btn {
+  font-weight: 500;
+  padding: 0.45rem 1rem;
+}
+
+.btn-outline-secondary {
+  border-color: #adb5bd;
+  color: #495057;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+}
+
+/* Tables (Result Page) */
+.table-responsive {
+  margin-top: 1rem;
+}
+
+.table th,
+.table td {
+  white-space: nowrap;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #fafafa;
+}
+
+/* Plotly (Preview Page) */
+.plot-container {
+  width: 100%;
+}
+
+#temp-plot,
+#rain-plot {
+  width: 100%;
+  height: 300px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .climpact-sidebar {
+    width: 100%;
+    height: auto;
+    min-height: auto;
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .climpact-main {
+    padding: 1rem;
+  }
+
+  .nav-tabs .nav-item {
+    flex: 1;
+    text-align: center;
+  }
+
+  .nav-tabs .nav-link {
+    border-radius: 6px 6px 0 0;
+    margin-right: 0 !important;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .card {
+    margin-bottom: 1rem;
+  }
+
+  .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .btn:last-child {
+    margin-bottom: 0;
+  }
+
+  .row > [class*="col-"] {
+    margin-bottom: 1rem;
+  }
+
+  .row > [class*="col-"]:last-child {
+    margin-bottom: 0;
+  }
+
+  .climpact-sidebar .nav-link img {
+    margin-right: 0.3rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .card-body p {
+    font-size: 0.95rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+}
+  .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .btn:last-child {
+    margin-bottom: 0;
+  }
+
+  .row > [class*="col-"] {
+    margin-bottom: 1rem;
+  }
+
+  .row > [class*="col-"]:last-child {
+    margin-bottom: 0;
+  }
+}

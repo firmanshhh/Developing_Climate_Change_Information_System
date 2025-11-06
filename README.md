@@ -31,3 +31,8 @@ Aplikasi web berbasis **Flask** untuk mengelola, menampilkan, dan menganalisis d
 4. **Jalankan Applikasi**
    ```bash
    python app.py:
+
+4. **Jalankan Applikasi**
+   ```bash
+   chmod +x folder_structure.sh
+   ./folder_structure.sh

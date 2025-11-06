@@ -1,0 +1,84 @@
+<!-- app/templates/homepage.html -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Climate Data Store</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Header -->
+    {% include 'header.html' %}
+
+    <!-- Hero Section dengan Video Background -->
+    <section class="hero-video">
+        <video autoplay muted loop playsinline class="hero-video-bg">
+            <source src="{{ url_for('static', filename='videos/wind.mp4') }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="hero-content">
+            <h1>Dive into this wealth of information about the Earth's past, and future climate</h1>
+        </div>
+    </section>
+
+    <!-- Hero Section -->
+    <!--<section class="hero">
+        <div class="hero-content">
+            <h1>Dive into this wealth of information about the Earth's past,and future climate</h1>
+        </div>
+    </section>
+
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <img src="{{ url_for('static', filename='icons/home/coins.svg') }}" alt="Dataset" width="24" height="24">
+            </div>
+            <h3>Dataset</h3>
+            <p>Access the full data store catalogue, with search and availability features</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <img src="{{ url_for('static', filename='icons/home/stats.svg') }}" alt="Analysis" width="24" height="24">
+            </div>
+            <h3>Analysis</h3>
+            <p>Copernicus Climate Change Service (C3S) data tutorials</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <img src="{{ url_for('static', filename='icons/home/big-data-analytics.svg') }}" alt="Dashboard" width="24" height="24">
+            </div>
+            <h3>Dashboard</h3>
+            <p>Open-source Python tools simplifying data access, processing, analysis, visualisation and much more</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <img src="{{ url_for('static', filename='icons/home/tools.svg') }}" alt="Tools" width="24" height="24">
+            </div>
+            <h3>Tools</h3>
+            <p>Access and process data within the Data Stores Common Cloud Infrastructure (CCI)</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">
+                <img src="{{ url_for('static', filename='icons/home/globe.svg') }}" alt="JupyterHub" width="24" height="24">
+            </div>
+            <h3>JupyterHub</h3>
+            <p>Access and process data within the Data Stores Common Cloud Infrastructure (CCI)</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    {% include 'footer.html' %}
+
+    <!-- Script (opsional) -->
+    <script>
+        // Bisa tambahkan interaksi di sini nanti
+    </script>
+</body>
+</html>

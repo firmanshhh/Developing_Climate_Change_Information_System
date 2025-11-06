@@ -2,26 +2,51 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ClimPACT - Proses Stasiun</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/climpact.css') }}">
 </head>
 <body>
     <div class="container-fluid">
-        <!-- Sidebar -->
         <div class="row">
-            <div class="col-md-2 bg-dark text-white vh-100 p-3">
-                <h5 class="mb-4">ClimPACT</h5>
+            <!-- Sidebar -->
+            <div class="col-md-2 climpact-sidebar">
+                <div class="logo-container">
+                    <img src="{{ url_for('static', filename='icons/home/BMKG_White.png') }}" 
+                         alt="BMKG Logo" class="img-fluid">
+                </div>
+                <h5>ClimPACT</h5>
                 <ul class="nav flex-column">
-                    <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('home') }}">🏠 Home</a></li>
-                    <li class="nav-item"><a class="nav-link text-white active" href="{{ url_for('climpact') }}">📊 Proses Stasiun</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('climpact_batch') }}">📁 Batch Process</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="#">📚 Dokumentasi</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{ url_for('home') }}">
+                            <img src="{{ url_for('static', filename='icons/climpact/home.svg') }}" width="20" height="20">
+                            Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white active" href="{{ url_for('climpact') }}">
+                            <img src="{{ url_for('static', filename='icons/climpact/single.svg') }}" width="20" height="20">
+                            Proses Stasiun
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{ url_for('climpact_batch') }}">
+                            <img src="{{ url_for('static', filename='icons/climpact/multi.svg') }}" width="20" height="20">
+                            Batch Process
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="#">
+                            <img src="{{ url_for('static', filename='icons/climpact/docs.svg') }}" width="20" height="20">
+                            Dokumentasi
+                        </a>
+                    </li>
                 </ul>
             </div>
 
             <!-- Main Content -->
-            <div class="col-md-10 p-4">
+            <div class="col-md-10 climpact-main">
                 <h2>Proses Data Stasiun Tunggal</h2>
                 <ul class="nav nav-tabs mb-4">
                     <li class="nav-item"><a class="nav-link active" href="#">Upload</a></li>
@@ -109,7 +134,7 @@
     </div>
 
     <script>
-        // Kirim CURRENT_PATH ke JS (jika diperlukan)
+        // Auto-fill metadata dari file (opsional dengan JS tambahan)
         window.CURRENT_PATH = '';
     </script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>

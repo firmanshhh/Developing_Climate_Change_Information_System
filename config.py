@@ -1,2 +1,2 @@
 BLOCKED_PATHS = [
-    "/admin/","PROYEKSI","REANALISIS"]
+    "/admin/","REANALYSIS","OBSERVASI","PROJECTION",]
