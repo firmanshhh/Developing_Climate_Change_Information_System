@@ -29,6 +29,7 @@
           <button id="delete-selected" disabled>🗑️ Hapus Terpilih</button>
         {% endif %}
 
+        
         <input type="text" id="search-input" placeholder="🔍 Cari file/folder..." />
         <select id="sort-select" onchange="sortItems(this.value)">
           <option value="">Urutkan</option>
@@ -39,6 +40,7 @@
         {% if items %}
           <button id="download-selected" disabled>⬇️ Download Terpilih</button>
         {% endif %}
+        
       </div>
 
       {% if not items %}

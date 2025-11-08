@@ -370,7 +370,6 @@ def climpact_batch_process():
 # ========================
 # 📁 FILE BROWSER & MANAJEMEN FILE
 # ========================
-
 @app.route('/files/')
 @app.route('/files/<path:filepath>')
 def browse(filepath=""):
@@ -379,9 +378,7 @@ def browse(filepath=""):
         return "🚫 Akses ditolak.", 403
     if contains_blocked_path(filepath) and not is_admin():
         return "🚫 Akses ditolak.", 403
-
     target_path = os.path.join(ROOT_FOLDER, filepath)
-    
     # Tambahan: pastikan target symlink (jika ada) tetap aman
     if os.path.islink(target_path):
         link_target = os.readlink(target_path)
@@ -394,7 +391,6 @@ def browse(filepath=""):
             item['name']: 'folder' if item['is_dir'] else get_icon_class(item['name'])
             for item in (items or [])
         }
-
         parent_path = None
         clean_path = filepath.strip('/')
         if clean_path:
@@ -461,11 +457,12 @@ def download_selected():
 
     raw_path = request.args.get('path', '')
     current_path = sanitize_path(raw_path)  # ← gunakan helper Anda
+    
     if not is_safe_path(ROOT_FOLDER, current_path) or (contains_blocked_path(current_path) and not is_admin()):
         return "🚫 Akses ditolak.", 403
 
     target_dir = os.path.join(ROOT_FOLDER, current_path)
-    base_real = os.path.realpath(ROOT_FOLDER)
+    base_real  = os.path.realpath(ROOT_FOLDER)
 
     valid_items = []
     for fname in files_param:
@@ -493,8 +490,9 @@ def download_selected():
             rel_parts = rel_to_root.split(os.sep)
             if any(part in BLOCKED_PATHS for part in rel_parts if part):
                 continue
-
+        
         is_dir = os.path.isdir(real_path)
+        print((fname_clean, real_path, is_dir))
         valid_items.append((fname_clean, real_path, is_dir))
 
     if not valid_items:
